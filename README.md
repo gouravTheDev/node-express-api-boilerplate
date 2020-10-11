@@ -7,7 +7,7 @@ This project includes protected riutes for both user and admin
 <br><br>
 This includes JWT authentication for signin process.
 <br><br>
-Guideline:- 
+Guideline:- <br>
 <span style="font-weight:bold">1. Clone the repo.</span><br>
 <span style="font-weight:bold">2. npm install</span><br>
 <span style="font-weight:bold">3. create a .env file</span><br>
@@ -16,5 +16,5 @@ Guideline:-
     DATABASE=mongodb://localhost/mydb<br>
     PORT=8000<br>
     SECRET=HDJGHDJGHDJKUTIYUOE8345UHDKFNSJFSITIEosdjidujfgjdje9urt34tketjksdlsd<br>
-</span><br>
+</span>
 <span style="font-weight:bold">5. run nodemon</span>
