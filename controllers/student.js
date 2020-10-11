@@ -1,9 +1,6 @@
 const User = require("../models/user");
 const Student = require("../models/student");
-const Payment = require("../models/payment");
 var md5 = require('md5');
-var Razorpay = require('razorpay');
-const crypto = require('crypto');
 
 exports.getStudentById = (req, res, next, id) => {
   User.findById(id).exec((err, user) => {
@@ -96,81 +93,3 @@ exports.changepassword = (req, res) => {
   }
 };
 
-// Start Payment
-exports.startPayment = (req, res) => {
-  var amountRcv = req.body.amount;
-  var month = req.body.month;
-  var instance = new Razorpay({ key_id: process.env.RZP_KEY_ID, key_secret: process.env.RZP_KEY_SECRET });
-  var options = {
-    amount: amountRcv,  // amount in the smallest currency unit
-    currency: "INR",
-    receipt: req.details.userid+"-"+req.body.month
-  };
-
-  instance.orders.create(options, function(err, orderObj) {
-    if (err) {
-      return res.status(401).json({
-        error: "Request could not be processed"
-      });
-    }else{
-     const payment = new Payment({
-        orderId: orderObj.id,
-        userId: req.details._id,
-        name: req.details.name,
-        amount: orderObj.amount,
-        currency: orderObj.currency,
-        receipt: orderObj.receipt,
-        month: req.body.month,
-        status: 0,
-      });
-      payment.save((err, payment) => {
-        if (err) {
-          return res.status(401).json({
-            // error: "Could not save data"
-            error: err
-          });
-        }else{
-          return res.json(orderObj);
-        }
-      });
-    }
-  });
-};
-
-// Process Payment
-exports.processPayment = (req, res) => {
-  var orderId = req.body.orderId;
-  var razorpay_payment_id = req.body.razorpay_payment_id;
-  var razorpay_order_id = req.body.razorpay_order_id;
-  var razorpay_signature = req.body.razorpay_signature;
-  
-  // generating signature
-
-  var generatedSignature = crypto.createHmac('sha256', process.env.RZP_KEY_SECRET).update(orderId + "|" + razorpay_payment_id).digest('hex');
-
-  //Checking signature
-  if (razorpay_signature == generatedSignature) {
-    var paymentDetails = {
-      paymentId: razorpay_payment_id,
-      dateOfPayment: new Date().toISOString().slice(0,10),
-      status: 1
-    }
-    //Update payment record, set status to 1
-    Payment.findOneAndUpdate(
-      { orderId: orderId },
-      { $set: paymentDetails },
-      { new: true, useFindAndModify: false } , (err, paymentDetails) => {
-      if (err || !paymentDetails) {
-        return res.status(401).json({
-          error: "Could not save payment details"
-        });
-      }else{
-        return res.json(paymentDetails);
-      }
-    });
-  }else{
-    return res.status(400).json({
-      error: "invalid signature"
-    });
-  }
-};

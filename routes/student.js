@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const { getStudentById, getStudent, getProfile, updateProfile, changepassword, startPayment, processPayment } = require("../controllers/student");
+const { getStudentById, getStudent, getProfile, updateProfile, changepassword } = require("../controllers/student");
 const { isSignedIn, isAuthenticated } = require("../controllers/auth");
 
 
@@ -19,10 +19,5 @@ router.put("/student/:studentId/profile", isSignedIn, isAuthenticated, updatePro
 //Change password
 router.put("/student/:studentId/changepassword", isSignedIn, isAuthenticated, changepassword);
 
-//Start payment
-router.post("/student/:studentId/startpayment", isSignedIn, isAuthenticated, startPayment);
-
-//Process payment
-router.post("/student/:studentId/processpayment", isSignedIn, isAuthenticated, processPayment);
 
 module.exports = router;
